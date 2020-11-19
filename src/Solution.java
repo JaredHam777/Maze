@@ -73,7 +73,7 @@ public class Solution {
 				colors = new char[gridLength-1];
 				table = new int[gridLength];
 				traceback = new int[gridLength];
-				loopTable = new int[numPoints];
+				loopTable = new int[gridLength];
 				for(int j=0; j<colors.length; j++)	{
 					colors[j] = lineValues[j].charAt(0);
 				}
@@ -96,7 +96,9 @@ public class Solution {
 				start.colors = new ArrayList<Character>();
 				//start.ends.add(end);
 				start.colors.add(new Character( lineValues[2].charAt(0)));
-				
+				if(start.start == 28)	{
+					System.out.println();
+				}
 
 
 				
@@ -142,6 +144,10 @@ public class Solution {
 		//Collections.sort(vertTree, new vertex());
 
 		goal = gridLength;
+		
+		vertex goalVertex = new vertex();
+		goalVertex.start = goal;
+		vertTree.add(goalVertex);
 	}
 	
 	
@@ -149,16 +155,16 @@ public class Solution {
 	
 	private int dynamic(vertex start)	{
 		
-		//we've done a loop! (been here before)
-		if(table[start.start - 1]!=-1) {
-			
-			return -1;
-		}
 		
-		if(loopTable[start.start]!=-1) {
+
+		
+		if(loopTable[start.start-1]!=-1) {
 			return -1;
 		}	
-		loopTable[start.start] = 0;
+		loopTable[start.start-1] = 0;
+		if(table[start.start - 1]!=-1) {			
+			return table[start.start-1];
+		}
 		//base case 1: (we've found the goal)
 		if(start.start == goal) {
 			table[start.start - 1] = 0;
@@ -171,6 +177,13 @@ public class Solution {
 		if(start.ends == null || start.ends.size()==0) {
 			return -1;
 		}
+		
+		//temp:
+		if(start.start == 25)	{
+			System.out.println("debug here");
+		}
+		//
+		
 		for(int end : start.ends)	{
 			for(vertex v : vertTree) {
 				if(end == v.start)	{
@@ -181,7 +194,7 @@ public class Solution {
 		
 		for(int i=0; i<options.size(); i++) {	
 			int optLength = dynamic(options.get(i));
-			if(optLength==-1) {continue;}	//this path turned out to be a dead end
+			if(optLength==-1) {continue;}	//this path turned out to be a loop
 			int length = Math.abs(start.start - start.ends.get(i)) + optLength;
 			if(length<min )	{
 				min=length;			
@@ -198,10 +211,17 @@ public class Solution {
 		return min;
 	}
 	
+	public void resetLoopTable()	{
+		for(int i=0; i<this.loopTable.length; i++)	{
+			loopTable[i] = -1;
+		}
+	}
+	
 	public void solveDynamic()	{
-		vertex luckyV = vertTree.get(luckyStart-1);
+		vertex luckyV = vertTree.get(luckyStart-1);		
 		vertex rocketV = vertTree.get(rocketStart-1);
 		System.out.println("Lucky's length: " + dynamic(luckyV));
+		resetLoopTable();
 		System.out.println("Rocket's length: " + dynamic(rocketV));
 	}
 	
